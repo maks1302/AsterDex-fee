@@ -546,6 +546,19 @@ export default function AsterCalculator() {
           </div>
         </div>
       </div>
+      
+      {/* Barely visible contact link */}
+      <div className="fixed bottom-4 right-4 z-50">
+        <a 
+          href="https://x.com/MaxDziura" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-[#efbf84]/20 hover:text-[#efbf84]/40 text-xs transition-colors duration-300 font-light"
+          title="Found an error or need fee adjustments? Contact me"
+        >
+          contact
+        </a>
+      </div>
     </div>
   )
 }
