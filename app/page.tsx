@@ -521,7 +521,7 @@ export default function AsterCalculator() {
                       Share
                     </Button>
                     <Button 
-                      onClick={() => window.open('https://asterdex.com', '_blank')}
+                      onClick={() => window.open('https://www.asterdex.com/en/referral/F04A89', '_blank')}
                       className="star-gradient hover:from-[#f4d4a4] hover:to-[#efbf84] text-black font-semibold px-3 py-2 rounded-lg text-xs orange-glow flex-1 h-9"
                     >
                       <ExternalLink className="w-3 h-3 mr-1" />
