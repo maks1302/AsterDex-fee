@@ -146,6 +146,17 @@ export default function AsterCalculator() {
     }).format(amount)
   }
 
+  // Helper function to open external links reliably
+  const openExternalLink = (url: string) => {
+    const link = document.createElement('a')
+    link.href = url
+    link.target = '_blank'
+    link.rel = 'noopener noreferrer'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   const shareOnTwitter = () => {
     const bestSaving = savings.reduce((max, current) => 
       current.yearlySavings > max.yearlySavings ? current : max
@@ -153,14 +164,7 @@ export default function AsterCalculator() {
     const text = `I save ${formatCurrency(bestSaving.yearlySavings)} yearly trading on @Aster_DEX! 🚀\n\nHidden orders + 0.01% maker fees + cross-chain liquidity = pure alpha 💎\n\nDecentralized perpetual contracts with $${asterData.volume} volume. The future is here! ⭐\n\nCalculate your savings:`
     const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`
     
-    // Create a temporary link element to trigger the share
-    const link = document.createElement('a')
-    link.href = shareUrl
-    link.target = '_blank'
-    link.rel = 'noopener noreferrer'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    openExternalLink(shareUrl)
   }
 
   return (
@@ -529,7 +533,7 @@ export default function AsterCalculator() {
                       Share
                     </Button>
                     <Button 
-                      onClick={() => window.open('https://www.asterdex.com/en/referral/F04A89', '_blank')}
+                      onClick={() => openExternalLink('https://www.asterdex.com/en/referral/F04A89')}
                       className="star-gradient hover:from-[#f4d4a4] hover:to-[#efbf84] text-black font-semibold px-3 py-2 rounded-lg text-xs orange-glow flex-1 h-9"
                     >
                       <ExternalLink className="w-3 h-3 mr-1" />
