@@ -151,8 +151,16 @@ export default function AsterCalculator() {
       current.yearlySavings > max.yearlySavings ? current : max
     )
     const text = `I save ${formatCurrency(bestSaving.yearlySavings)} yearly trading on @Aster_DEX! 🚀\n\nHidden orders + 0.01% maker fees + cross-chain liquidity = pure alpha 💎\n\nDecentralized perpetual contracts with $${asterData.volume} volume. The future is here! ⭐\n\nCalculate your savings:`
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`
-    window.open(url, '_blank')
+    const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`
+    
+    // Create a temporary link element to trigger the share
+    const link = document.createElement('a')
+    link.href = shareUrl
+    link.target = '_blank'
+    link.rel = 'noopener noreferrer'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   return (
