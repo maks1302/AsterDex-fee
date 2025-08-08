@@ -109,8 +109,6 @@ export default function AsterCalculator() {
   const [isSliderDragging, setIsSliderDragging] = useState(false)
   const [userVIPTier, setUserVIPTier] = useState("VIP_1")
   const [userMMTier, setUserMMTier] = useState<string | null>(null)
-  const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const lastUpdateTimeRef = useRef(0)
   const rafRef = useRef<number | null>(null)
 
   // Enhanced throttle function with better performance
@@ -163,21 +161,14 @@ export default function AsterCalculator() {
     return () => mediaQuery.removeEventListener('change', handleChange)
   }, [])
 
-  // Optimized slider change handler with instant visual feedback
+  // Slider change handler — update immediately for buttery UX
   const handleSliderChange = useCallback((value: number[]) => {
     setSliderValue(value)
-    
-    if (updateTimeoutRef.current) {
-      clearTimeout(updateTimeoutRef.current)
-    }
-    
-    updateTimeoutRef.current = setTimeout(() => {
-      const scaledValue = expScale(value[0], 100, 100000000)
-      const roundedValue = smartRound(scaledValue)
-      setVolume([roundedValue])
-      setDisplayVolume(roundedValue)
-    }, prefersReducedMotion ? 50 : 16)
-  }, [expScale, smartRound, prefersReducedMotion])
+    const scaledValue = expScale(value[0], 100, 100000000)
+    const roundedValue = smartRound(scaledValue)
+    setVolume([roundedValue])
+    setDisplayVolume(roundedValue)
+  }, [expScale, smartRound])
 
   // Handle slider drag start/end for optimal performance
   const handleSliderDragStart = useCallback(() => {
@@ -193,12 +184,9 @@ export default function AsterCalculator() {
     setSliderValue([inverseExpScale(volume[0], 100, 100000000)])
   }, [volume, inverseExpScale])
 
-  // Cleanup timeout on unmount
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (updateTimeoutRef.current) {
-        clearTimeout(updateTimeoutRef.current)
-      }
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current)
       }
@@ -500,7 +488,18 @@ export default function AsterCalculator() {
     return { savings, asterFees }
   }
 
-  const { savings, asterFees } = calculateSavings()
+  const { savings, asterFees } = useMemo(() => calculateSavings(), [
+    volume,
+    tradingMode,
+    userVIPTier,
+    userMMTier,
+    determineHyperliquidTier,
+    determineBinanceTier,
+    determineBybitTier,
+    determineCoinbaseTier,
+    calculateSimpleModeFees,
+    calculateProModeFees,
+  ])
   const maxSavings = Math.max(...savings.map(s => s.yearlySavings))
 
   // Split competitors into DEX vs CEX for subtle grouping
@@ -638,7 +637,15 @@ export default function AsterCalculator() {
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Left Column - Calculator */}
           <div className="space-y-4">
-              <Card className="glass-effect allow-overflow" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+              <Card className="glass-effect allow-overflow relative" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+                {tradingMode === "pro" && (
+                  <div className="absolute top-3 right-3 z-10 flex items-center gap-1 text-[#efbf84]">
+                    <Crown className="w-4 h-4" />
+                    <span className="font-semibold text-sm">
+                      {VIP_TIERS[userVIPTier as keyof typeof VIP_TIERS].name}
+                    </span>
+                  </div>
+                )}
               <CardHeader className="pb-3">
                 <CardTitle className="text-xl text-white flex items-center">
                   <BarChart3 className="w-5 h-5 mr-2 text-[#efbf84]" />
@@ -784,29 +791,18 @@ export default function AsterCalculator() {
                   </div>
                 </div>
 
-                {/* VIP Tier Display */}
-                {tradingMode === "pro" && (
+                {/* Market Maker display (VIP sits in the top-right badge now) */}
+                {tradingMode === "pro" && userMMTier && (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="text-white font-semibold text-sm block">Your VIP Tier</label>
+                      <label className="text-white font-semibold text-sm block">Market Maker</label>
                       <div className="flex items-center gap-1">
-                        <Crown className="w-4 h-4 text-[#efbf84]" />
+                        <Award className="w-4 h-4 text-[#efbf84]" />
                         <span className="text-[#efbf84] font-semibold text-sm">
-                          {VIP_TIERS[userVIPTier as keyof typeof VIP_TIERS].name}
+                          {MM_TIERS[userMMTier as keyof typeof MM_TIERS].name}
                         </span>
                       </div>
                     </div>
-                    {userMMTier && (
-                      <div className="flex items-center justify-between">
-                        <label className="text-white font-semibold text-sm block">Market Maker</label>
-                        <div className="flex items-center gap-1">
-                          <Award className="w-4 h-4 text-[#efbf84]" />
-                          <span className="text-[#efbf84] font-semibold text-sm">
-                            {MM_TIERS[userMMTier as keyof typeof MM_TIERS].name}
-                          </span>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 )}
 
@@ -832,10 +828,15 @@ export default function AsterCalculator() {
 
             {/* Features Grid */}
             <div className="grid grid-cols-2 gap-3">
-              <Card className="glass-effect hover:bg-white/5 transition-all duration-300 group" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+              <Card
+                className="glass-effect transform hover:-translate-y-1 hover:shadow-xl focus-within:ring-2 focus-within:ring-[#efbf84]/40 transition-all duration-300 group"
+                style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}
+                tabIndex={0}
+                role="group"
+              >
                 <CardHeader className="pb-2">
                   <div className="w-10 h-10 star-gradient rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
-                    <Globe className="w-5 h-5 text-black" />
+                    <Globe className="w-5 h-5 text-black" aria-hidden="true" />
                   </div>
                   <CardTitle className="text-white text-sm">Cross-Chain</CardTitle>
                 </CardHeader>
@@ -844,10 +845,15 @@ export default function AsterCalculator() {
                 </CardContent>
               </Card>
 
-              <Card className="glass-effect hover:bg-white/5 transition-all duration-300 group" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+              <Card
+                className="glass-effect transform hover:-translate-y-1 hover:shadow-xl focus-within:ring-2 focus-within:ring-[#efbf84]/40 transition-all duration-300 group"
+                style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}
+                tabIndex={0}
+                role="group"
+              >
                 <CardHeader className="pb-2">
                   <div className="w-10 h-10 star-gradient rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
-                    <Zap className="w-5 h-5 text-black" />
+                    <Zap className="w-5 h-5 text-black" aria-hidden="true" />
                   </div>
                   <CardTitle className="text-white text-sm">Hidden Orders</CardTitle>
                 </CardHeader>
@@ -856,10 +862,15 @@ export default function AsterCalculator() {
                 </CardContent>
               </Card>
 
-              <Card className="glass-effect hover:bg-white/5 transition-all duration-300 group" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+              <Card
+                className="glass-effect transform hover:-translate-y-1 hover:shadow-xl focus-within:ring-2 focus-within:ring-[#efbf84]/40 transition-all duration-300 group"
+                style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}
+                tabIndex={0}
+                role="group"
+              >
                 <CardHeader className="pb-2">
                   <div className="w-10 h-10 star-gradient rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
-                    <DollarSign className="w-5 h-5 text-black" />
+                    <DollarSign className="w-5 h-5 text-black" aria-hidden="true" />
                   </div>
                   <CardTitle className="text-white text-sm">{feeDisplayInfo.mode}</CardTitle>
                 </CardHeader>
@@ -869,8 +880,8 @@ export default function AsterCalculator() {
                       {tradingMode === "simple" ? "0.08% opening" : 
                        `${(asterFees?.makerFee * 100).toFixed(3)}% maker`}
                     </p>
-                    <div className="group relative">
-                      <Info className="w-3 h-3 text-[#efbf84] cursor-help hover:text-white transition-colors" />
+                    <div className="group relative overflow-visible">
+                      <Info className="w-3 h-3 text-[#efbf84] cursor-help hover:text-white transition-colors" aria-label="Fee info" />
                       <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-black/90 border border-white/20 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10 min-w-[200px]">
                         <div className="text-white text-xs font-semibold mb-1">{feeDisplayInfo.mode}</div>
                         <div className="text-[#efbf84] text-xs space-y-1">
@@ -885,10 +896,15 @@ export default function AsterCalculator() {
                 </CardContent>
               </Card>
 
-              <Card className="glass-effect hover:bg-white/5 transition-all duration-300 group" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+              <Card
+                className="glass-effect transform hover:-translate-y-1 hover:shadow-xl focus-within:ring-2 focus-within:ring-[#efbf84]/40 transition-all duration-300 group"
+                style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}
+                tabIndex={0}
+                role="group"
+              >
                 <CardHeader className="pb-2">
                   <div className="w-10 h-10 star-gradient rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
-                    <Shield className="w-5 h-5 text-black" />
+                    <Shield className="w-5 h-5 text-black" aria-hidden="true" />
                   </div>
                   <CardTitle className="text-white text-sm">
                     {tradingMode === "simple" ? "MEV Protection" : 

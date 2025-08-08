@@ -1,5 +1,5 @@
 import { Renderer, Program, Mesh, Color, Triangle } from "ogl";
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 
 const vertexShader = `
 attribute vec2 uv;
@@ -194,9 +194,13 @@ interface GalaxyProps {
   transparent?: boolean;
 }
 
-export default function Galaxy({
-  focal = [0.5, 0.5],
-  rotation = [1.0, 0.0],
+// Use stable default arrays to avoid identity changes across renders
+const DEFAULT_FOCAL: [number, number] = [0.5, 0.5];
+const DEFAULT_ROTATION: [number, number] = [1.0, 0.0];
+
+function GalaxyComponent({
+  focal = DEFAULT_FOCAL,
+  rotation = DEFAULT_ROTATION,
   starSpeed = 0.5,
   density = 1,
   hueShift = 30, // Changed to orange hue
@@ -361,8 +365,11 @@ export default function Galaxy({
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
   }, [
-    focal,
-    rotation,
+    // Avoid array identity churn; depend on primitive values instead
+    focal[0],
+    focal[1],
+    rotation[0],
+    rotation[1],
     starSpeed,
     density,
     hueShift,
@@ -381,3 +388,7 @@ export default function Galaxy({
 
   return <div ref={ctnDom} className="w-full h-full relative" {...rest} />;
 }
+
+const Galaxy = memo(GalaxyComponent);
+
+export default Galaxy;
