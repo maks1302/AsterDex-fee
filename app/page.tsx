@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
@@ -15,6 +15,115 @@ export default function AsterCalculator() {
   const [tradingMode, setTradingMode] = useState("simple")
   const [timeframe, setTimeframe] = useState("yearly")
   const [showResults, setShowResults] = useState(false)
+  const [sliderValue, setSliderValue] = useState([50]) // Internal slider state for smooth updates
+  const [displayVolume, setDisplayVolume] = useState(50000) // Instant display value
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  const [isSliderDragging, setIsSliderDragging] = useState(false)
+  const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const lastUpdateTimeRef = useRef(0)
+  const rafRef = useRef<number | null>(null)
+
+  // Enhanced throttle function with better performance
+  const throttle = useCallback((func: Function, delay: number) => {
+    let lastCall = 0
+    return (...args: any[]) => {
+      const now = Date.now()
+      if (now - lastCall >= delay) {
+        lastCall = now
+        func(...args)
+      }
+    }
+  }, [])
+
+  // Exponential scaling for better financial data handling
+  const expScale = useCallback((value: number, min: number, max: number) => {
+    const normalized = value / 100
+    const expValue = Math.pow(normalized, 2.5) // Exponential curve for better precision
+    return min + (max - min) * expValue
+  }, [])
+
+  const inverseExpScale = useCallback((value: number, min: number, max: number) => {
+    const normalized = (value - min) / (max - min)
+    return Math.round(100 * Math.pow(normalized, 1 / 2.5))
+  }, [])
+
+  // Smart rounding based on magnitude for better UX
+  const smartRound = useCallback((value: number) => {
+    if (value < 10000) {
+      return Math.round(value / 100) * 100 // Round to nearest 100 for small values
+    } else if (value < 100000) {
+      return Math.round(value / 1000) * 1000 // Round to nearest 1K for medium values
+    } else if (value < 1000000) {
+      return Math.round(value / 10000) * 10000 // Round to nearest 10K for large values
+    } else {
+      return Math.round(value / 100000) * 100000 // Round to nearest 100K for very large values
+    }
+  }, [])
+
+  // Enhanced motion preference detection
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setPrefersReducedMotion(mediaQuery.matches)
+    
+    const handleChange = (e: MediaQueryListEvent) => {
+      setPrefersReducedMotion(e.matches)
+    }
+    
+    mediaQuery.addEventListener('change', handleChange)
+    return () => mediaQuery.removeEventListener('change', handleChange)
+  }, [])
+
+  // Optimized slider change handler with instant visual feedback
+  const handleSliderChange = useCallback((value: number[]) => {
+    // Instant visual feedback - no delay
+    setSliderValue(value)
+    
+    // Fast debounced calculation (16ms for 60fps)
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current)
+    }
+    
+    updateTimeoutRef.current = setTimeout(() => {
+      const scaledValue = expScale(value[0], 100, 100000000)
+      const roundedValue = smartRound(scaledValue)
+      setVolume([roundedValue])
+      setDisplayVolume(roundedValue)
+    }, prefersReducedMotion ? 50 : 16) // 50ms for reduced motion, 16ms for normal
+  }, [expScale, smartRound, prefersReducedMotion])
+
+  // Handle slider drag start/end for optimal performance
+  const handleSliderDragStart = useCallback(() => {
+    setIsSliderDragging(true)
+  }, [])
+
+  const handleSliderDragEnd = useCallback(() => {
+    setIsSliderDragging(false)
+  }, [])
+
+  // Update internal slider value when volume changes externally
+  useEffect(() => {
+    setSliderValue([inverseExpScale(volume[0], 100, 100000000)])
+  }, [volume, inverseExpScale])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current)
+      }
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current)
+      }
+    }
+  }, [])
+
+  // Helper function to update volume and sync all states
+  const updateVolume = useCallback((newVolume: number) => {
+    const roundedValue = smartRound(newVolume)
+    setVolume([roundedValue])
+    setDisplayVolume(roundedValue)
+    setSliderValue([inverseExpScale(roundedValue, 100, 100000000)])
+  }, [smartRound, inverseExpScale])
 
   // Aster official data from https://docs.asterdex.com/product/asterex-pro/pro-fees
   const asterData = {
@@ -254,48 +363,84 @@ export default function AsterCalculator() {
                       <label className="text-white font-semibold text-sm block">Monthly Volume</label>
                       <p className="text-[#efbf84] text-xs">Adjust your trading volume</p>
                     </div>
-                    <div className="text-right">
-                      <div className="text-xl font-bold text-white">
-                        {formatCurrency(volume[0])}
+                                          <div className="text-right">
+                        <div className="text-xl font-bold text-white volume-display">
+                          {formatCurrency(displayVolume)}
+                        </div>
                       </div>
-                    </div>
                   </div>
                   
                   <div className="relative">
                     <Slider
-                      value={volume}
-                      onValueChange={setVolume}
-                      max={10000000}
-                      min={100}
-                      step={1000}
+                      value={sliderValue}
+                      onValueChange={handleSliderChange}
+                      onDragStart={handleSliderDragStart}
+                      onDragEnd={handleSliderDragEnd}
+                      max={100}
+                      min={0}
+                      step={1}
                       className="mb-2"
                     />
                     <div className="flex justify-between text-xs text-[#efbf84]">
                       <span>$100</span>
-                      <span>$10M+</span>
+                      <span>$100M+</span>
                     </div>
                   </div>
                   
                   {/* Compact Preset buttons */}
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     <Button 
-                      onClick={() => setVolume([5000])}
+                      onClick={() => updateVolume(100000)}
                       className="glossy-button text-[#efbf84] hover:text-white text-xs px-3 py-1 h-7 rounded-md"
                     >
-                      $5K
+                      $100K
                     </Button>
                     <Button 
-                      onClick={() => setVolume([50000])}
-                      className="glossy-button text-[#efbf84] hover:text-white text-xs px-3 py-1 h-7 rounded-md"
-                    >
-                      $50K
-                    </Button>
-                    <Button 
-                      onClick={() => setVolume([500000])}
+                      onClick={() => updateVolume(500000)}
                       className="glossy-button text-[#efbf84] hover:text-white text-xs px-3 py-1 h-7 rounded-md"
                     >
                       $500K
                     </Button>
+                    <Button 
+                      onClick={() => updateVolume(1000000)}
+                      className="glossy-button text-[#efbf84] hover:text-white text-xs px-3 py-1 h-7 rounded-md"
+                    >
+                      $1M
+                    </Button>
+                    <Button 
+                      onClick={() => updateVolume(10000000)}
+                      className="glossy-button text-[#efbf84] hover:text-white text-xs px-3 py-1 h-7 rounded-md hidden sm:inline-flex"
+                    >
+                      $10M
+                    </Button>
+                    <Button 
+                      onClick={() => updateVolume(100000000)}
+                      className="glossy-button text-[#efbf84] hover:text-white text-xs px-3 py-1 h-7 rounded-md hidden md:inline-flex"
+                    >
+                      $100M
+                    </Button>
+                    <input
+                      type="number"
+                      placeholder="Custom $"
+                      className="bg-black/30 border border-white/20 rounded-md px-3 py-1 h-7 text-white text-xs placeholder-[#efbf84] focus:outline-none focus:border-[#efbf84] transition-colors w-24"
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value) || 0;
+                        if (value > 0) {
+                          updateVolume(value);
+                        }
+                      }}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.currentTarget.blur();
+                        }
+                      }}
+                      onBlur={(e) => {
+                        const value = parseInt(e.target.value) || 0;
+                        if (value > 0) {
+                          updateVolume(value);
+                        }
+                      }}
+                    />
                   </div>
                 </div>
 

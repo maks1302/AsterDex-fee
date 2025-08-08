@@ -56,6 +56,78 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Prevent flashing during interactions */
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Optimize for reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+  
+  /* Optimized volume display with hardware acceleration */
+  .volume-display {
+    will-change: contents;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+    /* Prevent layout shifts */
+    min-width: 120px;
+    text-align: right;
+    /* Smooth transitions */
+    transition: none; /* Remove transitions to prevent flashing */
+  }
+  
+  /* Smooth transitions for all interactive elements */
+  button, input, select, textarea {
+    transition: all 0.2s ease-out;
+  }
+  
+  /* Hardware-accelerated slider components */
+  [data-radix-slider-track] {
+    transform: translateZ(0);
+    will-change: contents;
+    /* Prevent layout thrashing */
+    contain: layout style paint;
+  }
+  
+  [data-radix-slider-thumb] {
+    transform: translateZ(0);
+    will-change: transform;
+    /* Hardware acceleration */
+    backface-visibility: hidden;
+    perspective: 1000px;
+    /* Prevent layout shifts */
+    contain: layout style paint;
+  }
+  
+  [data-radix-slider-range] {
+    transform: translateZ(0);
+    will-change: contents;
+    /* Hardware acceleration */
+    backface-visibility: hidden;
+    /* Prevent layout thrashing */
+    contain: layout style paint;
+  }
+  
+  /* Optimize glass effects to prevent flashing */
+  .glass-effect {
+    transform: translateZ(0);
+    will-change: contents;
+    backface-visibility: hidden;
+    /* Prevent layout shifts */
+    contain: layout style paint;
+  }
 }
 
 /* Custom glossy effects */

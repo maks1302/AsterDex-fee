@@ -34,6 +34,7 @@ uniform float uRepulsionStrength;
 uniform float uMouseActiveFactor;
 uniform float uAutoCenterRepulsion;
 uniform bool uTransparent;
+uniform bool uReducedMotion;
 
 varying vec2 vUv;
 
@@ -112,8 +113,9 @@ vec3 StarLayer(vec2 uv) {
       float star = Star(gv - offset - pad, flareSize);
       vec3 color = base;
 
-      float twinkle = trisn(uTime * uSpeed + seed * 6.2831) * 0.5 + 1.0;
-      twinkle = mix(1.0, twinkle, uTwinkleIntensity);
+      // Reduce twinkling for reduced motion
+      float twinkle = uReducedMotion ? 1.0 : (trisn(uTime * uSpeed + seed * 6.2831) * 0.5 + 1.0);
+      twinkle = mix(1.0, twinkle, uReducedMotion ? 0.1 : uTwinkleIntensity);
       star *= twinkle;
       
       col += star * size * color;
@@ -134,7 +136,7 @@ void main() {
     float centerDist = length(uv - centerUV);
     vec2 repulsion = normalize(uv - centerUV) * (uAutoCenterRepulsion / (centerDist + 0.1));
     uv += repulsion * 0.05;
-  } else if (uMouseRepulsion) {
+  } else if (uMouseRepulsion && !uReducedMotion) {
     vec2 mousePosUV = (uMouse * uResolution.xy - focalPx) / uResolution.y;
     float mouseDist = length(uv - mousePosUV);
     vec2 repulsion = normalize(uv - mousePosUV) * (uRepulsionStrength / (mouseDist + 0.1));
@@ -144,7 +146,8 @@ void main() {
     uv += mouseOffset;
   }
 
-  float autoRotAngle = uTime * uRotationSpeed;
+  // Reduce rotation for reduced motion
+  float autoRotAngle = uReducedMotion ? 0.0 : uTime * uRotationSpeed;
   mat2 autoRot = mat2(cos(autoRotAngle), -sin(autoRotAngle), sin(autoRotAngle), cos(autoRotAngle));
   uv = autoRot * uv;
 
@@ -215,13 +218,18 @@ export default function Galaxy({
   const smoothMousePos = useRef({ x: 0.5, y: 0.5 });
   const targetMouseActive = useRef(0.0);
   const smoothMouseActive = useRef(0.0);
+  const prefersReducedMotion = useRef(false);
 
   useEffect(() => {
+    // Check for reduced motion preference
+    prefersReducedMotion.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    
     if (!ctnDom.current) return;
     const ctn = ctnDom.current;
     const renderer = new Renderer({
       alpha: transparent,
       premultipliedAlpha: false,
+      powerPreference: "high-performance", // Optimize for performance
     });
     const gl = renderer.gl;
 
@@ -283,20 +291,31 @@ export default function Galaxy({
         uMouseActiveFactor: { value: 0.0 },
         uAutoCenterRepulsion: { value: autoCenterRepulsion },
         uTransparent: { value: transparent },
+        uReducedMotion: { value: prefersReducedMotion.current },
       },
     });
 
     const mesh = new Mesh(gl, { geometry, program });
     let animateId: number;
+    let lastFrameTime = 0;
+    const targetFPS = prefersReducedMotion.current ? 30 : 60; // Lower FPS for reduced motion
+    const frameInterval = 1000 / targetFPS;
 
     function update(t: number) {
       animateId = requestAnimationFrame(update);
+      
+      // Frame rate limiting for reduced motion
+      if (prefersReducedMotion.current && t - lastFrameTime < frameInterval) {
+        return;
+      }
+      lastFrameTime = t;
+      
       if (!disableAnimation) {
         program.uniforms.uTime.value = t * 0.001;
         program.uniforms.uStarSpeed.value = (t * 0.001 * starSpeed) / 10.0;
       }
 
-      const lerpFactor = 0.05;
+      const lerpFactor = prefersReducedMotion.current ? 0.02 : 0.05; // Slower interpolation for reduced motion
       smoothMousePos.current.x +=
         (targetMousePos.current.x - smoothMousePos.current.x) * lerpFactor;
       smoothMousePos.current.y +=
