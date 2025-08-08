@@ -1005,7 +1005,7 @@ export default function AsterCalculator() {
                         animationDelay: `${idx * 80}ms`,
                       }}
                     >
-                      <div className={`w-12 h-12 sm:w-10 sm:h-10 lg:w-10 lg:h-10 rounded-lg flex items-center justify-center pop-in ${ITEM_BG_COLOR[item.id] || 'bg-[#efbf84]'}`} style={{ animationDelay: `${idx * 120}ms` }}>
+                      <div className={`w-12 h-12 sm:w-10 sm:h-10 lg:w-10 lg:h-10 rounded-lg flex items-center justify-center animate-bounce ${ITEM_BG_COLOR[item.id] || 'bg-[#efbf84]'}`} style={{ animationDelay: `${idx * 120}ms` }}>
                         <span className="text-2xl sm:text-xl lg:text-xl leading-none">{ITEM_EMOJI[item.id] || '✨'}</span>
                       </div>
                       <div className="text-sm text-white">
@@ -1554,6 +1554,9 @@ export default function AsterCalculator() {
         </div>
 
       </div>
+      
+      {/* Bottom spacer for breathing room when sections are expanded */}
+      <div className="h-16 sm:h-20 lg:h-24"></div>
       
       {/* Barely visible contact link */}
       <div className="fixed bottom-4 right-4 z-50">
