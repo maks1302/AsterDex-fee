@@ -2,7 +2,7 @@
 const nextConfig = {
   // App directory is now stable in Next.js 14
   experimental: {
-    optimizeCss: true,
+    // Removed optimizeCss as it requires critters module which isn't available
     optimizePackageImports: ['lucide-react', '@radix-ui/react-slider'],
   },
   compiler: {
