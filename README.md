@@ -1,4 +1,4 @@
-# Aster DEX Calculator
+# Aster DEX fees Calculator
 
 A beautiful, interactive calculator for comparing trading fees and savings on Aster DEX versus other platforms.
 

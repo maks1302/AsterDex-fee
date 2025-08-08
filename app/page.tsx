@@ -667,11 +667,24 @@ export default function AsterCalculator() {
   }
 
   const shareOnTwitter = () => {
-    // Use the active tabs: timeframe and baseline mode
-    const amount = baselineAmount
-    const timeframeLabel = timeframe === 'monthly' ? 'monthly' : timeframe === 'yearly' ? 'yearly' : 'over 5 years'
+    // Hard limits
+    const MAX_TWEET_CHARS = 270
+    const URL_CHARS = 24
+    const MAX_TEXT_CHARS = MAX_TWEET_CHARS - URL_CHARS
 
-    // Pick a random real-world asset with an integer count (>= 1)
+    // Dynamic values from active tabs
+    const amount = baselineAmount
+    const timeframeLabel = timeframe === 'monthly' ? 'monthly' : timeframe === 'yearly' ? 'yearly' : '5 years'
+
+    // Compact static copy to leave room for dynamic parts
+    const line1 = `I save ${formatCurrency(amount)} ${timeframeLabel} trading on @Aster_DEX! 🚀`
+    const line2 = `Hidden orders + VIP fees + cross-chain liquidity 💎`
+    const line3 = `$${asterData.volume} in decentralized perps ⭐`
+    const tail = `Calculate your savings:`
+    const preText = line1
+    const restText = [line2, line3, tail].join("\n\n")
+
+    // Build integer asset candidates
     const integerCandidates = EQUIVALENT_ITEMS
       .map((item) => {
         const count = Math.floor(amount / item.unitPriceUsd)
@@ -679,17 +692,69 @@ export default function AsterCalculator() {
       })
       .filter((e) => e.count >= 1)
 
-    const chosen = integerCandidates.length
-      ? integerCandidates[Math.floor(Math.random() * integerCandidates.length)]
-      : null
+    // Helpers to build asset line variants
+    const buildAssetLine = (
+      count: number,
+      label: string,
+      emoji: string | undefined,
+      variant: 'full' | 'noEmoji' | 'short' | 'minimal'
+    ) => {
+      if (variant === 'full') return `That’s enough for ${count}x ${label}${emoji ? ` ${emoji}` : ''}`
+      if (variant === 'noEmoji') return `That’s enough for ${count}x ${label}`
+      if (variant === 'short') return `Enough for ${count}x ${label}`
+      return `${count}x ${label}`
+    }
 
-    const assetLine = chosen
-      ? `\n\nThat’s enough for ${chosen.count}x ${chosen.item.label} ${ITEM_EMOJI[chosen.item.id] || ''}`
-      : ''
+    // Try to select an asset that fits into remaining space
+    const trySelectFittingAsset = () => {
+      const VARIANTS: Array<'full' | 'noEmoji' | 'short' | 'minimal'> = ['full', 'noEmoji', 'short', 'minimal']
+      for (const variant of VARIANTS) {
+        const fitting = integerCandidates
+          .map(({ item, count }) => {
+            const emoji = ITEM_EMOJI[item.id]
+            const line = buildAssetLine(count, item.label, emoji, variant)
+            return { item, count, line, length: line.length }
+          })
+          // Position asset line after line1, before the rest
+          .filter((x) => preText.length + 2 + x.length + 2 + restText.length <= MAX_TEXT_CHARS)
 
-    const text = `I save ${formatCurrency(amount)} ${timeframeLabel} trading on @Aster_DEX! 🚀${assetLine}\n\nHidden orders + VIP fees + cross-chain liquidity = pure alpha 💎\n\nDecentralized perpetual contracts with $${asterData.volume} volume. The future is here! ⭐\n\nCalculate your savings:`
-    const shareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`
+        if (fitting.length) {
+          return fitting[Math.floor(Math.random() * fitting.length)]
+        }
+      }
 
+      // If none fit, choose the shortest minimal variant and include only if it doesn't break the cap
+      if (integerCandidates.length) {
+        const minimalList = integerCandidates
+          .map(({ item, count }) => {
+            const line = buildAssetLine(count, item.label, undefined, 'minimal')
+            return { item, count, line, length: line.length }
+          })
+          .sort((a, b) => a.length - b.length)
+        const shortest = minimalList[0]
+        if (shortest && preText.length + 2 + shortest.length + 2 + restText.length <= MAX_TEXT_CHARS) {
+          return shortest
+        }
+      }
+
+      // As a final fallback, return nothing (no asset line) to respect the limit
+      return null
+    }
+
+    const chosen = trySelectFittingAsset()
+    let composed = chosen
+      ? `${preText}\n\n${chosen.line}\n\n${restText}`
+      : `${preText}\n\n${restText}`
+
+    // Safety: if still too long, drop asset line first, then truncate as last resort
+    if (composed.length > MAX_TEXT_CHARS) {
+      composed = `${preText}\n\n${restText}`
+      if (composed.length > MAX_TEXT_CHARS) {
+        composed = composed.slice(0, MAX_TEXT_CHARS)
+      }
+    }
+
+    const shareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(composed)}&url=${encodeURIComponent(window.location.href)}`
     openExternalLink(shareUrl)
   }
 
