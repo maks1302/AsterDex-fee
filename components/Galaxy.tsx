@@ -259,6 +259,16 @@ function GalaxyComponent({
       }
     }
     window.addEventListener("resize", resize, false);
+
+    // Also observe container size changes (content height can grow without a window resize)
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(() => {
+        resize();
+      });
+      resizeObserver.observe(ctn);
+    }
+
     resize();
 
     const geometry = new Triangle(gl);
@@ -357,6 +367,7 @@ function GalaxyComponent({
     return () => {
       cancelAnimationFrame(animateId);
       window.removeEventListener("resize", resize);
+      resizeObserver?.disconnect();
       if (mouseInteraction) {
         ctn.removeEventListener("mousemove", handleMouseMove);
         ctn.removeEventListener("mouseleave", handleMouseLeave);

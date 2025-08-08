@@ -667,12 +667,29 @@ export default function AsterCalculator() {
   }
 
   const shareOnTwitter = () => {
-    const bestSaving = savings.reduce((max, current) => 
-      current.yearlySavings > max.yearlySavings ? current : max
-    )
-    const text = `I save ${formatCurrency(bestSaving.yearlySavings)} yearly trading on @Aster_DEX! 🚀\n\nHidden orders + VIP fees + cross-chain liquidity = pure alpha 💎\n\nDecentralized perpetual contracts with $${asterData.volume} volume. The future is here! ⭐\n\nCalculate your savings:`
+    // Use the active tabs: timeframe and baseline mode
+    const amount = baselineAmount
+    const timeframeLabel = timeframe === 'monthly' ? 'monthly' : timeframe === 'yearly' ? 'yearly' : 'over 5 years'
+
+    // Pick a random real-world asset with an integer count (>= 1)
+    const integerCandidates = EQUIVALENT_ITEMS
+      .map((item) => {
+        const count = Math.floor(amount / item.unitPriceUsd)
+        return { item, count }
+      })
+      .filter((e) => e.count >= 1)
+
+    const chosen = integerCandidates.length
+      ? integerCandidates[Math.floor(Math.random() * integerCandidates.length)]
+      : null
+
+    const assetLine = chosen
+      ? `\n\nThat’s enough for ${chosen.count}x ${chosen.item.label} ${ITEM_EMOJI[chosen.item.id] || ''}`
+      : ''
+
+    const text = `I save ${formatCurrency(amount)} ${timeframeLabel} trading on @Aster_DEX! 🚀${assetLine}\n\nHidden orders + VIP fees + cross-chain liquidity = pure alpha 💎\n\nDecentralized perpetual contracts with $${asterData.volume} volume. The future is here! ⭐\n\nCalculate your savings:`
     const shareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`
-    
+
     openExternalLink(shareUrl)
   }
 
@@ -754,7 +771,7 @@ export default function AsterCalculator() {
           
           
           
-          <p className="text-base text-[#efbf84] mb-4 max-w-2xl mx-auto">
+          <p className="text-base text-[#efbf84] mb-4 max-w-2xl mx-auto lg:max-w-none lg:whitespace-nowrap">
             Multi-chain, liquid, secure. Compare your savings with ultra-low fees and cross-chain liquidity
           </p>
           
@@ -788,12 +805,12 @@ export default function AsterCalculator() {
             <Card className="glass-effect allow-overflow" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
               <CardHeader className="pb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex flex-col sm:flex-row items-center gap-2 sm:justify-start justify-center text-center sm:text-left">
-                  <div className="w-8 h-8 star-gradient rounded-lg flex items-center justify-center animate-pulse mx-auto sm:mx-0">
-                    <Rocket className="w-4 h-4 text-black" />
+                  <div className="w-8 h-8 sm:w-8 sm:h-8 lg:w-6 lg:h-6 star-gradient rounded-lg flex items-center justify-center motion-safe:animate-pulse lg:animate-none mx-auto sm:mx-0 flex-shrink-0">
+                    <Rocket className="w-4 h-4 lg:w-3 lg:h-3 text-black" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg text-white">
-                      <span className="bg-gradient-to-r from-[#efbf84] via-[#f4d4a4] to-[#efbf84] bg-clip-text text-transparent">Your Savings IRL</span>
+                    <CardTitle className="text-base sm:text-lg text-white leading-tight">
+                      <span className="bg-gradient-to-r from-[#efbf84] via-[#f4d4a4] to-[#efbf84] bg-clip-text text-transparent lg:whitespace-nowrap">Your Savings IRL</span>
                     </CardTitle>
                     <p className="text-[#efbf84] text-xs">Based on {timeframe} savings</p>
                   </div>
