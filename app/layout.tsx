@@ -6,8 +6,44 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Aster DEX Calculator',
+  title: {
+    default: 'Aster DEX Calculator',
+    template: '%s | Aster DEX',
+  },
   description: 'Calculate your trading savings with Aster DEX',
+  applicationName: 'Aster DEX',
+  keywords: [
+    'Aster DEX',
+    'DEX',
+    'calculator',
+    'crypto',
+    'trading',
+    'fees',
+    'savings',
+  ],
+  authors: [{ name: 'Aster DEX' }],
+  creator: 'Aster DEX',
+  alternates: { canonical: '/' },
+  openGraph: {
+    title: 'Aster DEX Calculator',
+    description: 'Calculate your trading savings with Aster DEX',
+    url: '/',
+    siteName: 'Aster DEX',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Aster DEX Calculator',
+    description: 'Calculate your trading savings with Aster DEX',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  icons: {
+    icon: '/icon.svg',
+  },
 }
 
 export default function RootLayout({
