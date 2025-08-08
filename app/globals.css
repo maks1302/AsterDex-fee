@@ -161,6 +161,12 @@
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
   }
   
+  /* Allow specific glass containers to overflow tooltips/popovers */
+  .allow-overflow {
+    contain: none !important;
+    overflow: visible !important;
+  }
+  
   /* Override Card component's bg-card class */
   .glass-effect.bg-card,
   .glass-effect[class*="bg-card"] {
