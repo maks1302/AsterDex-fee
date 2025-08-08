@@ -26,7 +26,7 @@ const EQUIVALENT_ITEMS: EquivalentItem[] = [
   { id: 'ps5', label: 'PlayStation 5', unitPriceUsd: 499, icon: (p) => <Gamepad {...p} /> },
   { id: 'tesla', label: 'Tesla Model 3', unitPriceUsd: 40000, icon: (p) => <Car {...p} /> },
   { id: 'rent', label: 'Month of Rent', unitPriceUsd: 2000, icon: (p) => <Home {...p} /> },
-  { id: 'flight', label: 'Long‑haul Flight', unitPriceUsd: 5000, icon: (p) => <Plane {...p} /> },
+  { id: 'flight', label: 'Long‑haul Flight', unitPriceUsd: 1500, icon: (p) => <Plane {...p} /> },
   { id: 'coffee', label: 'Cup of Coffee', unitPriceUsd: 4.5, icon: (p) => <CupSoda {...p} /> },
   { id: 'lambo', label: 'Lambo', unitPriceUsd: 240000, icon: (p) => <Car {...p} /> },
   
@@ -949,7 +949,7 @@ export default function AsterCalculator() {
                     <CardTitle className="text-base sm:text-lg text-white leading-tight">
                       <span className="bg-gradient-to-r from-[#efbf84] via-[#f4d4a4] to-[#efbf84] bg-clip-text text-transparent lg:whitespace-nowrap">Your Savings IRL</span>
                     </CardTitle>
-                    <p className="text-[#efbf84] text-xs">Based on {timeframe} savings</p>
+                    <p className="text-[#efbf84] text-xs whitespace-nowrap">Based on {timeframe === 'lifetime' ? '5 years' : timeframe} savings</p>
                   </div>
                 </div>
                 <div className="sm:ml-auto flex flex-row flex-nowrap items-center gap-2 sm:gap-3 w-full justify-between sm:justify-end overflow-x-auto no-scrollbar">
