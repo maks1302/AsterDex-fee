@@ -7,8 +7,136 @@ import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
-import { Star, Zap, Shield, TrendingUp, Copy, ExternalLink, Sparkles, Globe, BarChart3, DollarSign, ArrowRight, Info, Crown, Award } from 'lucide-react'
+import { Star, Zap, Shield, TrendingUp, Copy, ExternalLink, Sparkles, Globe, BarChart3, DollarSign, ArrowRight, Info, Crown, Award, Car, Smartphone, Laptop, Gamepad, CupSoda, Plane, Home, Wallet, Rocket } from 'lucide-react'
 import Galaxy from '@/components/Galaxy'
+
+// Playful savings equivalence items (approximate USD values)
+type BaselineMode = 'closest' | 'average' | 'highest'
+
+type EquivalentItem = {
+  id: string
+  label: string
+  unitPriceUsd: number
+  icon: (props: { className?: string }) => JSX.Element
+}
+
+const EQUIVALENT_ITEMS: EquivalentItem[] = [
+  { id: 'iphone', label: 'iPhone 16 Pro', unitPriceUsd: 999, icon: (p) => <Smartphone {...p} /> },
+  { id: 'macbook', label: 'MacBook Air', unitPriceUsd: 1199, icon: (p) => <Laptop {...p} /> },
+  { id: 'ps5', label: 'PlayStation 5', unitPriceUsd: 499, icon: (p) => <Gamepad {...p} /> },
+  { id: 'tesla', label: 'Tesla Model 3', unitPriceUsd: 40000, icon: (p) => <Car {...p} /> },
+  { id: 'rent', label: 'Month of Rent', unitPriceUsd: 2000, icon: (p) => <Home {...p} /> },
+  { id: 'flight', label: 'Long‑haul Flight', unitPriceUsd: 5000, icon: (p) => <Plane {...p} /> },
+  { id: 'coffee', label: 'Cup of Coffee', unitPriceUsd: 4.5, icon: (p) => <CupSoda {...p} /> },
+  { id: 'lambo', label: 'Lambo', unitPriceUsd: 240000, icon: (p) => <Car {...p} /> },
+  
+  { id: 'seeker', label: 'Solana Seeker', unitPriceUsd: 499, icon: (p) => <Smartphone {...p} /> },
+  { id: 'rolex', label: 'Rolex Submariner', unitPriceUsd: 10000, icon: (p) => <Star {...p} /> },
+  { id: 'airpods', label: 'AirPods Pro', unitPriceUsd: 249, icon: (p) => <Star {...p} /> },
+  { id: 'jordan_sneakers', label: 'Jordan Sneakers', unitPriceUsd: 200, icon: (p) => <Star {...p} /> },
+  { id: 'dji_drone', label: 'DJI Mini Drone', unitPriceUsd: 759, icon: (p) => <Star {...p} /> },
+  { id: 'cybertruck', label: 'Cybertruck', unitPriceUsd: 60000, icon: (p) => <Star {...p} /> },
+  { id: 'porsche_911', label: 'Porsche 911', unitPriceUsd: 120000, icon: (p) => <Star {...p} /> },
+  { id: 'g_wagon', label: 'G‑Wagon', unitPriceUsd: 150000, icon: (p) => <Star {...p} /> },
+  { id: 'ferrari_f8', label: 'Ferrari F8', unitPriceUsd: 275000, icon: (p) => <Star {...p} /> },
+  { id: 'bugatti_chiron', label: 'Bugatti Chiron', unitPriceUsd: 3000000, icon: (p) => <Star {...p} /> },
+  
+  { id: 'pizza', label: 'Large Pizza', unitPriceUsd: 15, icon: (p) => <Star {...p} /> },
+  { id: 'mcd_meal', label: "McDonald's Meal", unitPriceUsd: 8, icon: (p) => <Star {...p} /> },
+  
+]
+
+const ITEM_EMOJI: Record<string, string> = {
+  iphone: '📱',
+  macbook: '💻',
+  ps5: '🎮',
+  tesla: '🚗',
+  rent: '🏠',
+  flight: '✈️',
+  coffee: '☕️',
+  lambo: '🏎️',
+  
+  seeker: '📱',
+  rolex: '⌚️',
+  airpods: '🎧',
+  jordan_sneakers: '👟',
+  dji_drone: '🛸',
+  cybertruck: '🛻',
+  porsche_911: '🏎️',
+  g_wagon: '🚙',
+  ferrari_f8: '🏎️',
+  bugatti_chiron: '🏎️',
+  
+  pizza: '🍕',
+  mcd_meal: '🍔',
+  
+}
+
+// Tailwind-based background colors per item for the emoji tile
+const ITEM_BG_COLOR: Record<string, string> = {
+  iphone: 'bg-sky-400',
+  macbook: 'bg-indigo-400',
+  ps5: 'bg-blue-500',
+  tesla: 'bg-rose-500',
+  rent: 'bg-amber-500',
+  flight: 'bg-cyan-300',
+  coffee: 'bg-amber-700',
+  lambo: 'bg-lime-500',
+  seeker: 'bg-purple-500',
+  rolex: 'bg-emerald-500',
+  airpods: 'bg-zinc-500',
+  jordan_sneakers: 'bg-indigo-600',
+  dji_drone: 'bg-sky-500',
+  cybertruck: 'bg-zinc-700',
+  porsche_911: 'bg-yellow-500',
+  g_wagon: 'bg-emerald-700',
+  ferrari_f8: 'bg-yellow-300',
+  bugatti_chiron: 'bg-blue-700',
+  
+  pizza: 'bg-orange-600',
+  mcd_meal: 'bg-red-500',
+  
+}
+
+function selectBaselineAmount(
+  savings: Array<{ monthlySavings: number; yearlySavings: number; lifetimeSavings: number }>,
+  timeframe: 'monthly' | 'yearly' | 'lifetime',
+  mode: BaselineMode
+): number {
+  if (!savings || savings.length === 0) return 0
+  const key =
+    timeframe === 'monthly'
+      ? 'monthlySavings'
+      : timeframe === 'yearly'
+      ? 'yearlySavings'
+      : 'lifetimeSavings'
+  const values = savings.map((s) => Math.max(0, (s as any)[key] as number))
+  if (mode === 'closest') {
+    const positives = values.filter((v) => v > 0)
+    return positives.length ? Math.min(...positives) : 0
+  }
+  if (mode === 'highest') {
+    return Math.max(...values)
+  }
+  // average (ignore zero/negatives to avoid skewing down)
+  const positives = values.filter((v) => v > 0)
+  if (!positives.length) return 0
+  return positives.reduce((a, b) => a + b, 0) / positives.length
+}
+
+function computeEquivalents(amountUsd: number, maxItems: number = 4) {
+  if (!amountUsd || amountUsd <= 0) return [] as Array<{ item: EquivalentItem; count: number }>
+  const scored = EQUIVALENT_ITEMS.map((item) => {
+    const count = amountUsd / item.unitPriceUsd
+    // Prefer counts around 3 for readability
+    const score = Math.abs(Math.log10(Math.max(count, 1e-6)) - Math.log10(3))
+    return { item, count, score }
+  })
+    .filter((e) => e.count >= 0.1) // hide vanishingly small counts
+    .sort((a, b) => a.score - b.score)
+
+  return scored.slice(0, maxItems).map(({ item, count }) => ({ item, count }))
+}
 
 // VIP Tier definitions
 const VIP_TIERS = {
@@ -100,11 +228,12 @@ const SIMPLE_MODE_FEES = {
 
 export default function AsterCalculator() {
   const [volume, setVolume] = useState([50000])
-  const [tradingMode, setTradingMode] = useState("simple")
+  const [tradingMode, setTradingMode] = useState("pro")
   const [timeframe, setTimeframe] = useState("yearly")
   const [showResults, setShowResults] = useState(false)
   const [sliderValue, setSliderValue] = useState([50])
   const [displayVolume, setDisplayVolume] = useState(50000)
+  const [baselineMode, setBaselineMode] = useState<BaselineMode>('highest')
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const [isSliderDragging, setIsSliderDragging] = useState(false)
   const [userVIPTier, setUserVIPTier] = useState("VIP_1")
@@ -500,6 +629,14 @@ export default function AsterCalculator() {
     calculateSimpleModeFees,
     calculateProModeFees,
   ])
+  const baselineAmount = useMemo(() =>
+    selectBaselineAmount(
+      savings as Array<{ monthlySavings: number; yearlySavings: number; lifetimeSavings: number }>,
+      (timeframe as 'monthly' | 'yearly' | 'lifetime'),
+      baselineMode
+    )
+  , [savings, timeframe, baselineMode])
+  const equivalents = useMemo(() => computeEquivalents(baselineAmount, 4), [baselineAmount])
   const maxSavings = Math.max(...savings.map(s => s.yearlySavings))
 
   // Split competitors into DEX vs CEX for subtle grouping
@@ -632,6 +769,69 @@ export default function AsterCalculator() {
             </div>
           </div>
         </div>
+
+        {/* Savings Equivalents Section - above main grid */}
+        {showResults && baselineAmount > 0 && (
+          <div className="mb-6">
+            <Card className="glass-effect allow-overflow" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+              <CardHeader className="pb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col sm:flex-row items-center gap-2 sm:justify-start justify-center text-center sm:text-left">
+                  <div className="w-8 h-8 star-gradient rounded-lg flex items-center justify-center animate-pulse mx-auto sm:mx-0">
+                    <Rocket className="w-4 h-4 text-black" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg text-white">
+                      <span className="bg-gradient-to-r from-[#efbf84] via-[#f4d4a4] to-[#efbf84] bg-clip-text text-transparent">Your Savings IRL</span>
+                    </CardTitle>
+                    <p className="text-[#efbf84] text-xs">Based on {timeframe} savings</p>
+                  </div>
+                </div>
+                <div className="sm:ml-auto flex items-center gap-1 text-[10px] text-[#efbf84] bg-black/30 border border-white/10 rounded-md p-1 w-full sm:w-auto">
+                  <button
+                    onClick={() => setBaselineMode('closest')}
+                    className={`flex-1 lg:flex-none px-2 py-1 rounded ${baselineMode === 'closest' ? 'bg-[#efbf84] text-black' : 'text-[#efbf84]'}`}
+                    aria-label="Show savings vs closest competitor"
+                  >Closest</button>
+                  <button
+                    onClick={() => setBaselineMode('average')}
+                    className={`flex-1 lg:flex-none px-2 py-1 rounded ${baselineMode === 'average' ? 'bg-[#efbf84] text-black' : 'text-[#efbf84]'}`}
+                    aria-label="Show savings vs average competitor"
+                  >Average</button>
+                  <button
+                    onClick={() => setBaselineMode('highest')}
+                    className={`flex-1 lg:flex-none px-2 py-1 rounded ${baselineMode === 'highest' ? 'bg-[#efbf84] text-black' : 'text-[#efbf84]'}`}
+                    aria-label="Show savings vs highest competitor"
+                  >Highest</button>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-stretch">
+                  {equivalents.map(({ item, count }, idx) => (
+                    <div
+                      key={item.id}
+                      className={`relative flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-4 py-3 shadow-lg hover:shadow-[#efbf84]/20 transition-all hover:-translate-y-0.5`}
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                      }}
+                    >
+                      <div className={`w-12 h-12 sm:w-10 sm:h-10 lg:w-10 lg:h-10 rounded-lg flex items-center justify-center animate-bounce ${ITEM_BG_COLOR[item.id] || 'bg-[#efbf84]'}`} style={{ animationDelay: `${idx * 120}ms` }}>
+                        <span className="text-2xl sm:text-xl lg:text-xl leading-none">{ITEM_EMOJI[item.id] || '✨'}</span>
+                      </div>
+                      <div className="text-sm text-white">
+                        <div className="font-extrabold tracking-wide">
+                          {count >= 1 ? Math.floor(count) : count.toFixed(1)}x {item.label}
+                        </div>
+                        <div className="text-[10px] text-[#efbf84]/80">
+                          ≈ {formatCurrency(Math.round((count) * item.unitPriceUsd))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Main Calculator Grid - Single Screen Layout */}
         <div className="grid lg:grid-cols-2 gap-6">
@@ -1178,6 +1378,7 @@ export default function AsterCalculator() {
             )}
           </div>
         </div>
+
       </div>
       
       {/* Barely visible contact link */}
