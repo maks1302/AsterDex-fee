@@ -177,4 +177,38 @@
   .glass-effect {
     background-color: transparent !important;
   }
+  
+  /* Share on X micro-interactions */
+  @keyframes sharePulse {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+  @keyframes riseFadeShare {
+    0% { opacity: 1; transform: translateY(0) scale(0.9) rotate(0deg); }
+    100% { opacity: 0; transform: translateY(-24px) scale(1.15) rotate(10deg); }
+  }
+  .share-pulse {
+    animation: sharePulse 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .x-burst span {
+    position: absolute;
+    bottom: 0;
+    transform: translateX(-50%);
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 800;
+    color: #efbf84;
+    text-shadow: 0 0 12px rgba(239, 191, 132, 0.6);
+    animation: riseFadeShare 700ms ease-out forwards;
+  }
+
+  /* Hide horizontal scrollbar for compact header controls */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
 }

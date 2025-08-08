@@ -239,6 +239,7 @@ export default function AsterCalculator() {
   const [userVIPTier, setUserVIPTier] = useState("VIP_1")
   const [userMMTier, setUserMMTier] = useState<string | null>(null)
   const rafRef = useRef<number | null>(null)
+  const [isSharing, setIsSharing] = useState(false)
 
   // Enhanced throttle function with better performance
   const throttle = useCallback((func: Function, delay: number) => {
@@ -670,9 +671,20 @@ export default function AsterCalculator() {
       current.yearlySavings > max.yearlySavings ? current : max
     )
     const text = `I save ${formatCurrency(bestSaving.yearlySavings)} yearly trading on @Aster_DEX! 🚀\n\nHidden orders + VIP fees + cross-chain liquidity = pure alpha 💎\n\nDecentralized perpetual contracts with $${asterData.volume} volume. The future is here! ⭐\n\nCalculate your savings:`
-    const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`
+    const shareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`
     
     openExternalLink(shareUrl)
+  }
+
+  const handleShareClick = () => {
+    if (prefersReducedMotion) {
+      shareOnTwitter()
+      return
+    }
+    setIsSharing(true)
+    // Trigger share immediately while playing a short animation
+    shareOnTwitter()
+    setTimeout(() => setIsSharing(false), 800)
   }
 
   // Get current fee display info
@@ -786,22 +798,46 @@ export default function AsterCalculator() {
                     <p className="text-[#efbf84] text-xs">Based on {timeframe} savings</p>
                   </div>
                 </div>
-                <div className="sm:ml-auto flex items-center gap-1 text-[10px] text-[#efbf84] bg-black/30 border border-white/10 rounded-md p-1 w-full sm:w-auto">
-                  <button
-                    onClick={() => setBaselineMode('closest')}
-                    className={`flex-1 lg:flex-none px-2 py-1 rounded ${baselineMode === 'closest' ? 'bg-[#efbf84] text-black' : 'text-[#efbf84]'}`}
-                    aria-label="Show savings vs closest competitor"
-                  >Closest</button>
-                  <button
-                    onClick={() => setBaselineMode('average')}
-                    className={`flex-1 lg:flex-none px-2 py-1 rounded ${baselineMode === 'average' ? 'bg-[#efbf84] text-black' : 'text-[#efbf84]'}`}
-                    aria-label="Show savings vs average competitor"
-                  >Average</button>
-                  <button
-                    onClick={() => setBaselineMode('highest')}
-                    className={`flex-1 lg:flex-none px-2 py-1 rounded ${baselineMode === 'highest' ? 'bg-[#efbf84] text-black' : 'text-[#efbf84]'}`}
-                    aria-label="Show savings vs highest competitor"
-                  >Highest</button>
+                <div className="sm:ml-auto flex flex-row flex-nowrap items-center gap-2 sm:gap-3 w-full justify-between sm:justify-end overflow-x-auto no-scrollbar">
+                  <div className="flex items-center gap-1 text-[10px] text-[#efbf84] bg-black/30 border border-white/10 rounded-md p-1 whitespace-nowrap">
+                    <button
+                      onClick={() => setBaselineMode('closest')}
+                      className={`flex-1 lg:flex-none px-2 py-1 rounded ${baselineMode === 'closest' ? 'bg-[#efbf84] text-black' : 'text-[#efbf84]'}`}
+                      aria-label="Show savings vs closest competitor"
+                    >Closest</button>
+                    <button
+                      onClick={() => setBaselineMode('average')}
+                      className={`flex-1 lg:flex-none px-2 py-1 rounded ${baselineMode === 'average' ? 'bg-[#efbf84] text-black' : 'text-[#efbf84]'}`}
+                      aria-label="Show savings vs average competitor"
+                    >Average</button>
+                    <button
+                      onClick={() => setBaselineMode('highest')}
+                      className={`flex-1 lg:flex-none px-2 py-1 rounded ${baselineMode === 'highest' ? 'bg-[#efbf84] text-black' : 'text-[#efbf84]'}`}
+                      aria-label="Show savings vs highest competitor"
+                    >Highest</button>
+                  </div>
+                  <div className="block h-6 w-px bg-white/15 mx-1 flex-shrink-0" role="separator" aria-orientation="vertical" />
+                  <div className="relative">
+                    <Button 
+                      onClick={handleShareClick}
+                      className={`star-gradient hover:from-[#f4d4a4] hover:to-[#efbf84] text-black font-bold px-2 sm:px-3 py-1.5 rounded-md text-[11px] sm:text-sm h-8 sm:h-9 flex items-center gap-1.5 sm:gap-2 orange-glow flex-shrink-0 ${isSharing ? 'share-pulse' : ''}`}
+                      aria-label="Share your savings on X"
+                    >
+                      <span className="inline-flex items-center justify-center w-4 h-4 text-[18px] font-bold" style={{ lineHeight: '1' }}>𝕏</span>
+                      <span>Share</span>
+                    </Button>
+                    {isSharing && (
+                      <div className="x-burst absolute -inset-x-2 -bottom-1 top-0 z-10 pointer-events-none" aria-hidden="true">
+                        {[
+                          { x: -24, d: 0 },
+                          { x: 0, d: 80 },
+                          { x: 24, d: 0 },
+                        ].map(({ x, d }, i) => (
+                          <span key={i} style={{ left: `calc(50% + ${x}px)`, bottom: '0px', animationDelay: `${d}ms` }}>𝕏</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="pt-2">
@@ -1358,13 +1394,6 @@ export default function AsterCalculator() {
 
                   {/* Action Buttons */}
                   <div className="flex gap-2 pt-2">
-                    <Button 
-                      onClick={shareOnTwitter}
-                      className="glossy-button text-[#efbf84] hover:text-white font-semibold px-3 py-2 rounded-lg text-xs transition-all duration-200 flex-1 h-9"
-                    >
-                      <span className="inline-flex items-center justify-center w-3 h-3 mr-1 text-[16px] font-bold" style={{ lineHeight: '1' }}>𝕏</span>
-                      Share
-                    </Button>
                     <Button 
                       onClick={() => openExternalLink('https://www.asterdex.com/en/referral/F04A89')}
                       className="star-gradient hover:from-[#f4d4a4] hover:to-[#efbf84] text-black font-semibold px-3 py-2 rounded-lg text-xs orange-glow flex-1 h-9"
