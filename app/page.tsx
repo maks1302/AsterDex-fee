@@ -34,7 +34,7 @@ const EQUIVALENT_ITEMS: EquivalentItem[] = [
   { id: 'rolex', label: 'Rolex Submariner', unitPriceUsd: 10000, icon: (p) => <Star {...p} /> },
   { id: 'airpods', label: 'AirPods Pro', unitPriceUsd: 249, icon: (p) => <Star {...p} /> },
   { id: 'jordan_sneakers', label: 'Jordan Sneakers', unitPriceUsd: 200, icon: (p) => <Star {...p} /> },
-  { id: 'dji_drone', label: 'DJI Mini Drone', unitPriceUsd: 759, icon: (p) => <Star {...p} /> },
+  { id: 'dji_drone', label: 'DJI Drone', unitPriceUsd: 759, icon: (p) => <Star {...p} /> },
   { id: 'cybertruck', label: 'Cybertruck', unitPriceUsd: 60000, icon: (p) => <Star {...p} /> },
   { id: 'porsche_911', label: 'Porsche 911', unitPriceUsd: 120000, icon: (p) => <Star {...p} /> },
   { id: 'g_wagon', label: 'G‑Wagon', unitPriceUsd: 150000, icon: (p) => <Star {...p} /> },
@@ -1185,7 +1185,7 @@ export default function AsterCalculator() {
                 </div>
               </Card>
             ) : (
-              <Card className="glass-effect allow-overflow" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+              <Card className="glass-effect allow-overflow h-full" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg text-white flex items-center">
                     <TrendingUp className="w-4 h-4 mr-2 text-[#efbf84]" />
