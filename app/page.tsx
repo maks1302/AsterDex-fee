@@ -240,6 +240,7 @@ export default function AsterCalculator() {
   const [userMMTier, setUserMMTier] = useState<string | null>(null)
   const rafRef = useRef<number | null>(null)
   const [isSharing, setIsSharing] = useState(false)
+  const scrollRafRef = useRef<number | null>(null)
 
   // Enhanced throttle function with better performance
   const throttle = useCallback((func: Function, delay: number) => {
@@ -291,6 +292,74 @@ export default function AsterCalculator() {
     return () => mediaQuery.removeEventListener('change', handleChange)
   }, [])
 
+  // Custom eased smooth scroll (mobile-friendly, respects reduced motion)
+  const smoothScrollToY = useCallback((targetY: number, duration: number = 750) => {
+    if (prefersReducedMotion) {
+      window.scrollTo(0, targetY)
+      return
+    }
+    // Prevent CSS smooth from interfering with JS tween
+    const html = document.documentElement as HTMLElement
+    const previousBehavior = html.style.scrollBehavior
+    html.style.scrollBehavior = 'auto'
+
+    const startY = window.scrollY || window.pageYOffset
+    const delta = targetY - startY
+    const startTime = performance.now()
+
+    // Spring physics for more natural feel
+    const springConfig = {
+      stiffness: 0.15,
+      damping: 0.8,
+      mass: 1
+    }
+
+    if (scrollRafRef.current) cancelAnimationFrame(scrollRafRef.current)
+    const step = (now: number) => {
+      const elapsed = now - startTime
+      const t = Math.min(1, elapsed / duration)
+      
+      // Spring easing
+      const springT = 1 - Math.pow(1 - t, 3) * (1 - t * 0.3)
+      const eased = springT
+      
+      window.scrollTo(0, Math.round(startY + delta * eased))
+      if (t < 1) {
+        scrollRafRef.current = requestAnimationFrame(step)
+      } else {
+        html.style.scrollBehavior = previousBehavior
+      }
+    }
+    scrollRafRef.current = requestAnimationFrame(step)
+  }, [prefersReducedMotion])
+
+  const smoothScrollIntoView = useCallback((element: HTMLElement, offset = 0, duration = 750) => {
+    const rect = element.getBoundingClientRect()
+    const targetY = Math.max(0, Math.floor(window.scrollY + rect.top - offset))
+    smoothScrollToY(targetY, duration)
+  }, [smoothScrollToY])
+
+  // Enhanced button press handler with micro-interactions
+  const handleCalculatePress = useCallback(() => {
+    setShowResults(true)
+    if (window.innerWidth < 1024) {
+      setTimeout(() => {
+        const el = document.getElementById('results-section')
+        if (el) {
+          smoothScrollIntoView(el, 8, 850)
+        }
+      }, 150)
+    }
+  }, [smoothScrollIntoView])
+
+  // Add button press animation
+  const [isButtonPressed, setIsButtonPressed] = useState(false)
+  const handleButtonPress = useCallback(() => {
+    setIsButtonPressed(true)
+    handleCalculatePress()
+    setTimeout(() => setIsButtonPressed(false), 300)
+  }, [handleCalculatePress])
+
   // Slider change handler — update immediately for buttery UX
   const handleSliderChange = useCallback((value: number[]) => {
     setSliderValue(value)
@@ -319,6 +388,9 @@ export default function AsterCalculator() {
     return () => {
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current)
+      }
+      if (scrollRafRef.current) {
+        cancelAnimationFrame(scrollRafRef.current)
       }
     }
   }, [])
@@ -677,10 +749,10 @@ export default function AsterCalculator() {
     const timeframeLabel = timeframe === 'monthly' ? 'monthly' : timeframe === 'yearly' ? 'yearly' : '5 years'
 
     // Compact static copy to leave room for dynamic parts
-    const line1 = `I save ${formatCurrency(amount)} ${timeframeLabel} trading on @Aster_DEX! 🚀`
+    const line1 = `I save ${formatCurrency(amount)} ${timeframeLabel} trading on @Aster_DEX 🚀`
     const line2 = `Hidden orders + VIP fees + cross-chain liquidity 💎`
     const line3 = `$${asterData.volume} in decentralized perps ⭐`
-    const tail = `Calculate your savings:`
+    const tail = `Check your savings:`
     const preText = line1
     const restText = [line2, line3, tail].join("\n\n")
 
@@ -699,8 +771,8 @@ export default function AsterCalculator() {
       emoji: string | undefined,
       variant: 'full' | 'noEmoji' | 'short' | 'minimal'
     ) => {
-      if (variant === 'full') return `That’s enough for ${count}x ${label}${emoji ? ` ${emoji}` : ''}`
-      if (variant === 'noEmoji') return `That’s enough for ${count}x ${label}`
+      if (variant === 'full') return `That's enough for ${count}x ${label}${emoji ? ` ${emoji}` : ''}`
+      if (variant === 'noEmoji') return `That's enough for ${count}x ${label}`
       if (variant === 'short') return `Enough for ${count}x ${label}`
       return `${count}x ${label}`
     }
@@ -841,23 +913,23 @@ export default function AsterCalculator() {
           </p>
           
           <div className="flex flex-wrap justify-center gap-3 mb-4">
-            <div className="glass-effect rounded-xl px-4 py-2" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+            <div className="glass-effect rounded-xl px-4 py-2 float" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
               <div className="text-lg font-bold text-white">${asterData.volume}</div>
               <div className="text-xs text-[#efbf84]">Total Volume</div>
             </div>
-            <div className="glass-effect rounded-xl px-4 py-2" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+            <div className="glass-effect rounded-xl px-4 py-2 float" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)', animationDelay: '0.5s' }}>
               <div className="text-lg font-bold text-white">{asterData.users}</div>
               <div className="text-xs text-[#efbf84]">Users</div>
             </div>
-            <div className="glass-effect rounded-xl px-4 py-2" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+            <div className="glass-effect rounded-xl px-4 py-2 float" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)', animationDelay: '1s' }}>
               <div className="text-lg font-bold text-white">${asterData.openInterest}</div>
               <div className="text-xs text-[#efbf84]">Open Interest</div>
             </div>
-            <div className="glass-effect rounded-xl px-4 py-2" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+            <div className="glass-effect rounded-xl px-4 py-2 float" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)', animationDelay: '1.5s' }}>
               <div className="text-lg font-bold text-white">${asterData.tvl}</div>
               <div className="text-xs text-[#efbf84]">TVL</div>
             </div>
-            <div className="glass-effect rounded-xl px-4 py-2" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+            <div className="glass-effect rounded-xl px-4 py-2 float" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)', animationDelay: '2s' }}>
               <div className="text-lg font-bold text-white">{asterData.symbols}</div>
               <div className="text-xs text-[#efbf84]">Symbols</div>
             </div>
@@ -867,10 +939,10 @@ export default function AsterCalculator() {
         {/* Savings Equivalents Section - above main grid */}
         {showResults && baselineAmount > 0 && (
           <div className="mb-6">
-            <Card className="glass-effect allow-overflow" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+            <Card className="glass-effect allow-overflow reveal-in-slow" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
               <CardHeader className="pb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex flex-col sm:flex-row items-center gap-2 sm:justify-start justify-center text-center sm:text-left">
-                  <div className="w-8 h-8 sm:w-8 sm:h-8 lg:w-6 lg:h-6 star-gradient rounded-lg flex items-center justify-center motion-safe:animate-pulse lg:animate-none mx-auto sm:mx-0 flex-shrink-0">
+                  <div className="w-8 h-8 sm:w-8 sm:h-8 lg:w-6 lg:h-6 star-gradient rounded-lg flex items-center justify-center motion-safe:animate-pulse lg:animate-none mx-auto sm:mx-0 flex-shrink-0 float">
                     <Rocket className="w-4 h-4 lg:w-3 lg:h-3 text-black" />
                   </div>
                   <div>
@@ -927,12 +999,13 @@ export default function AsterCalculator() {
                   {equivalents.map(({ item, count }, idx) => (
                     <div
                       key={item.id}
-                      className={`relative flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-4 py-3 shadow-lg hover:shadow-[#efbf84]/20 transition-all hover:-translate-y-0.5`}
+                      className={`relative flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-4 py-3 shadow-lg hover:shadow-[#efbf84]/20 transition-all hover:-translate-y-0.5 reveal-in`}
                       style={{
                         background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                        animationDelay: `${idx * 80}ms`,
                       }}
                     >
-                      <div className={`w-12 h-12 sm:w-10 sm:h-10 lg:w-10 lg:h-10 rounded-lg flex items-center justify-center animate-bounce ${ITEM_BG_COLOR[item.id] || 'bg-[#efbf84]'}`} style={{ animationDelay: `${idx * 120}ms` }}>
+                      <div className={`w-12 h-12 sm:w-10 sm:h-10 lg:w-10 lg:h-10 rounded-lg flex items-center justify-center pop-in ${ITEM_BG_COLOR[item.id] || 'bg-[#efbf84]'}`} style={{ animationDelay: `${idx * 120}ms` }}>
                         <span className="text-2xl sm:text-xl lg:text-xl leading-none">{ITEM_EMOJI[item.id] || '✨'}</span>
                       </div>
                       <div className="text-sm text-white">
@@ -1125,18 +1198,8 @@ export default function AsterCalculator() {
                 )}
 
                 <Button 
-                  onClick={() => {
-                    setShowResults(true);
-                    if (window.innerWidth < 1024) {
-                      setTimeout(() => {
-                        document.getElementById('results-section')?.scrollIntoView({ 
-                          behavior: 'smooth',
-                          block: 'start'
-                        });
-                      }, 100);
-                    }
-                  }}
-                  className="w-full star-gradient hover:from-[#f4d4a4] hover:to-[#efbf84] text-black font-bold py-2 text-sm rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 orange-glow"
+                  onClick={handleButtonPress}
+                  className={`w-full star-gradient hover:from-[#f4d4a4] hover:to-[#efbf84] text-black font-bold py-2 text-sm rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 orange-glow ${isButtonPressed ? 'button-press' : ''}`}
                 >
                   <Sparkles className="w-4 h-4 mr-2" />
                   Calculate Savings
@@ -1250,7 +1313,7 @@ export default function AsterCalculator() {
                 </div>
               </Card>
             ) : (
-              <Card className="glass-effect allow-overflow h-full" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+              <Card className="glass-effect allow-overflow h-full reveal-in" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg text-white flex items-center">
                     <TrendingUp className="w-4 h-4 mr-2 text-[#efbf84]" />
@@ -1372,7 +1435,7 @@ export default function AsterCalculator() {
                         </div>
                         <div className="w-full bg-black/50 rounded-full h-1.5 overflow-hidden">
                           <div 
-                            className="star-gradient h-1.5 rounded-full transition-all duration-1000 ease-out"
+                            className="star-gradient h-1.5 rounded-full progress-spring"
                             style={{ width: `${progressValue}%` }}
                           ></div>
                         </div>
@@ -1466,7 +1529,7 @@ export default function AsterCalculator() {
                         </div>
                         <div className="w-full bg-black/50 rounded-full h-1.5 overflow-hidden">
                           <div 
-                            className="star-gradient h-1.5 rounded-full transition-all duration-1000 ease-out"
+                            className="star-gradient h-1.5 rounded-full progress-spring"
                             style={{ width: `${progressValue}%` }}
                           ></div>
                         </div>
