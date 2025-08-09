@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: {
-    default: 'Aster DEX Calculator',
+    default: 'Aster DEX fees Calculator',
     template: '%s | Aster DEX',
   },
   description: 'Calculate your trading savings with Aster DEX',
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   creator: 'Aster DEX',
   alternates: { canonical: '/' },
   openGraph: {
-    title: 'Aster DEX Calculator',
+    title: 'Aster DEX fees Calculator',
     description: 'Calculate your trading savings with Aster DEX',
     url: '/',
     siteName: 'Aster DEX',
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary',
-    title: 'Aster DEX Calculator',
+    title: 'Aster DEX fees Calculator',
     description: 'Calculate your trading savings with Aster DEX',
   },
   robots: {

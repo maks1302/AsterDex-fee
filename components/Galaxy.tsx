@@ -259,7 +259,6 @@ function GalaxyComponent({
       }
     }
     window.addEventListener("resize", resize, false);
-
     // Also observe container size changes (content height can grow without a window resize)
     let resizeObserver: ResizeObserver | null = null;
     if (typeof ResizeObserver !== "undefined") {
