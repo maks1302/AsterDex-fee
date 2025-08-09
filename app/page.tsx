@@ -896,7 +896,7 @@ export default function AsterCalculator() {
 
       <div className="relative z-10 container mx-auto px-4 py-6 max-w-6xl">
         {/* Compact Header */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-6 header-entrance">
           <h1 className="text-4xl font-bold mb-3 leading-tight">
             <span className="bg-gradient-to-r from-[#efbf84] via-[#f4d4a4] to-[#efbf84] bg-clip-text text-transparent">
               Calculate Your Savings
@@ -912,24 +912,24 @@ export default function AsterCalculator() {
             Multi-chain, liquid, secure. Compare your savings with ultra-low fees and cross-chain liquidity
           </p>
           
-          <div className="flex flex-wrap justify-center gap-3 mb-4">
-            <div className="glass-effect rounded-xl px-4 py-2 float" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+          <div className="flex flex-wrap justify-center gap-3 mb-4 stats-entrance">
+            <div className="glass-effect rounded-xl px-4 py-2 float stat-item-entrance" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
               <div className="text-lg font-bold text-white">${asterData.volume}</div>
               <div className="text-xs text-[#efbf84]">Total Volume</div>
             </div>
-            <div className="glass-effect rounded-xl px-4 py-2 float" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)', animationDelay: '0.5s' }}>
+            <div className="glass-effect rounded-xl px-4 py-2 float stat-item-entrance" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
               <div className="text-lg font-bold text-white">{asterData.users}</div>
               <div className="text-xs text-[#efbf84]">Users</div>
             </div>
-            <div className="glass-effect rounded-xl px-4 py-2 float" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)', animationDelay: '1s' }}>
+            <div className="glass-effect rounded-xl px-4 py-2 float stat-item-entrance" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
               <div className="text-lg font-bold text-white">${asterData.openInterest}</div>
               <div className="text-xs text-[#efbf84]">Open Interest</div>
             </div>
-            <div className="glass-effect rounded-xl px-4 py-2 float" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)', animationDelay: '1.5s' }}>
+            <div className="glass-effect rounded-xl px-4 py-2 float stat-item-entrance" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
               <div className="text-lg font-bold text-white">${asterData.tvl}</div>
               <div className="text-xs text-[#efbf84]">TVL</div>
             </div>
-            <div className="glass-effect rounded-xl px-4 py-2 float" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)', animationDelay: '2s' }}>
+            <div className="glass-effect rounded-xl px-4 py-2 float stat-item-entrance" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
               <div className="text-lg font-bold text-white">{asterData.symbols}</div>
               <div className="text-xs text-[#efbf84]">Symbols</div>
             </div>
@@ -1025,7 +1025,7 @@ export default function AsterCalculator() {
         )}
 
         {/* Main Calculator Grid - Single Screen Layout */}
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div className="grid lg:grid-cols-2 gap-6 content-entrance">
           {/* Left Column - Calculator */}
           <div className="space-y-4">
               <Card className="glass-effect allow-overflow relative" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>

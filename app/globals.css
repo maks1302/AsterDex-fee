@@ -279,4 +279,85 @@
     transform-origin: left;
     animation: progressSpring 1200ms cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
   }
+
+  /* Page entrance animations for smooth initial load */
+  @keyframes pageEntrance {
+    0% { 
+      opacity: 0; 
+    }
+    100% { 
+      opacity: 1; 
+    }
+  }
+
+  @keyframes headerEntrance {
+    0% { 
+      opacity: 0; 
+      transform: translateY(-15px) scale(0.95); 
+    }
+    100% { 
+      opacity: 1; 
+      transform: translateY(0) scale(1); 
+    }
+  }
+
+  @keyframes statsEntrance {
+    0% { 
+      opacity: 0; 
+      transform: translateY(10px) scale(0.9); 
+    }
+    100% { 
+      opacity: 1; 
+      transform: translateY(0) scale(1); 
+    }
+  }
+
+  @keyframes contentEntrance {
+    0% { 
+      opacity: 0; 
+      transform: translateY(15px) scale(0.96); 
+    }
+    100% { 
+      opacity: 1; 
+      transform: translateY(0) scale(1); 
+    }
+  }
+
+  /* Apply entrance animations with staggered timing */
+  .page-entrance {
+    animation: pageEntrance 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+    will-change: opacity, transform;
+  }
+
+  .header-entrance {
+    animation: headerEntrance 600ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+    will-change: opacity, transform;
+    animation-delay: 100ms;
+  }
+
+  .stats-entrance {
+    animation: statsEntrance 700ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+    will-change: opacity, transform;
+    animation-delay: 200ms;
+  }
+
+  .content-entrance {
+    animation: contentEntrance 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+    will-change: opacity, transform;
+    animation-delay: 300ms;
+  }
+
+  /* Staggered entrance for individual stat items */
+  .stat-item-entrance {
+    animation: statsEntrance 600ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+    will-change: opacity, transform;
+  }
+
+  .stat-item-entrance:nth-child(1) { animation-delay: 250ms; }
+  .stat-item-entrance:nth-child(2) { animation-delay: 350ms; }
+  .stat-item-entrance:nth-child(3) { animation-delay: 450ms; }
+  .stat-item-entrance:nth-child(4) { animation-delay: 550ms; }
+  .stat-item-entrance:nth-child(5) { animation-delay: 650ms; }
+
+
 }
