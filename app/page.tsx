@@ -1080,31 +1080,31 @@ export default function AsterCalculator() {
                   <div className="flex gap-2 flex-wrap">
                     <Button 
                       onClick={() => updateVolume(100000)}
-                      className="glossy-button text-[#efbf84] hover:text-white text-xs px-3 py-1 h-7 rounded-md"
+                      className="glossy-button preset-button text-[#efbf84] hover:text-white text-xs px-3 py-1 h-7 rounded-md"
                     >
                       $100K
                     </Button>
                     <Button 
                       onClick={() => updateVolume(500000)}
-                      className="glossy-button text-[#efbf84] hover:text-white text-xs px-3 py-1 h-7 rounded-md"
+                      className="glossy-button preset-button text-[#efbf84] hover:text-white text-xs px-3 py-1 h-7 rounded-md"
                     >
                       $500K
                     </Button>
                     <Button 
                       onClick={() => updateVolume(1000000)}
-                      className="glossy-button text-[#efbf84] hover:text-white text-xs px-3 py-1 h-7 rounded-md"
+                      className="glossy-button preset-button text-[#efbf84] hover:text-white text-xs px-3 py-1 h-7 rounded-md"
                     >
                       $1M
                     </Button>
                     <Button 
                       onClick={() => updateVolume(10000000)}
-                      className="glossy-button text-[#efbf84] hover:text-white text-xs px-3 py-1 h-7 rounded-md hidden sm:inline-flex"
+                      className="glossy-button preset-button text-[#efbf84] hover:text-white text-xs px-3 py-1 h-7 rounded-md hidden sm:inline-flex"
                     >
                       $10M
                     </Button>
                     <Button 
                       onClick={() => updateVolume(100000000)}
-                      className="glossy-button text-[#efbf84] hover:text-white text-xs px-3 py-1 h-7 rounded-md hidden md:inline-flex"
+                      className="glossy-button preset-button text-[#efbf84] hover:text-white text-xs px-3 py-1 h-7 rounded-md hidden md:inline-flex"
                     >
                       $100M
                     </Button>
@@ -1262,7 +1262,7 @@ export default function AsterCalculator() {
                        `${(asterFees?.makerFee * 100).toFixed(3)}% maker`}
                     </p>
                     <div className="group relative overflow-visible">
-                      <Info className="w-3 h-3 text-[#efbf84] cursor-help hover:text-white transition-colors" aria-label="Fee info" />
+                      <Info className="w-3 h-3 text-[#efbf84] cursor-help info-button transition-colors" aria-label="Fee info" />
                       <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-black/90 border border-white/20 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10 min-w-[200px]">
                         <div className="text-white text-xs font-semibold mb-1">{feeDisplayInfo.mode}</div>
                         <div className="text-[#efbf84] text-xs space-y-1">
@@ -1340,7 +1340,7 @@ export default function AsterCalculator() {
                             <span className="text-white font-semibold text-xs">vs {saving.name}</span>
                               {competitor && (
                                 <div className="group relative overflow-visible">
-                                <Info className="w-3 h-3 text-[#efbf84] cursor-help hover:text-white transition-colors" />
+                                <Info className="w-3 h-3 text-[#efbf84] cursor-help info-button transition-colors" />
                                                                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-black/90 border border-white/20 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 min-w-[220px]">
                                    <div className="text-white text-xs font-semibold mb-1">{competitor.description}</div>
                                                                        <div className="text-[#efbf84] text-xs space-y-1">
@@ -1541,7 +1541,7 @@ export default function AsterCalculator() {
                   <div className="flex gap-2 pt-2">
                     <Button 
                       onClick={() => openExternalLink('https://www.asterdex.com/en/referral/F04A89')}
-                      className="star-gradient hover:from-[#f4d4a4] hover:to-[#efbf84] text-black font-semibold px-3 py-2 rounded-lg text-xs orange-glow flex-1 h-9"
+                      className="star-gradient hover:from-[#f4d4a4] hover:to-[#efbf84] text-black font-semibold px-3 py-2 rounded-lg text-sm orange-glow flex-1 h-9"
                     >
                       <ExternalLink className="w-3 h-3 mr-1" />
                       Trade Now

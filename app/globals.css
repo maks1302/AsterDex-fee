@@ -157,14 +157,25 @@
   .glossy-button:hover {
     background: linear-gradient(135deg, rgba(239, 191, 132, 0.25) 0%, rgba(239, 191, 132, 0.12) 100%);
     @apply border-white/40 shadow-xl;
+    transform: translateY(-1px) scale(1.02);
   }
   
   .star-gradient {
     background: linear-gradient(135deg, #efbf84 0%, #f4d4a4 50%, #efbf84 100%);
   }
   
+  .star-gradient:hover {
+    background: linear-gradient(135deg, #f4d4a4 0%, #efbf84 50%, #f4d4a4 100%);
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(239, 191, 132, 0.4);
+  }
+  
   .orange-glow {
     box-shadow: 0 0 20px rgba(239, 191, 132, 0.3);
+  }
+  
+  .orange-glow:hover {
+    box-shadow: 0 0 30px rgba(239, 191, 132, 0.5);
   }
   
   .glass-effect {
@@ -359,5 +370,29 @@
   .stat-item-entrance:nth-child(4) { animation-delay: 550ms; }
   .stat-item-entrance:nth-child(5) { animation-delay: 650ms; }
 
+  /* Enhanced tab trigger hover effects */
+  [data-radix-tabs-trigger]:not([data-state="active"]):hover {
+    background: rgba(239, 191, 132, 0.1);
+    border-color: rgba(239, 191, 132, 0.3);
+    transform: translateY(-1px);
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  
+  /* Enhanced preset button hover effects */
+  .preset-button {
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  
+  .preset-button:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 12px rgba(239, 191, 132, 0.2);
+  }
+  
+  /* Enhanced info button hover effects */
+  .info-button:hover {
+    transform: scale(1.1);
+    color: white;
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
 
 }
