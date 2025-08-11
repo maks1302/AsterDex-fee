@@ -936,9 +936,9 @@ export default function AsterCalculator() {
           </div>
         </div>
 
-        {/* Savings Equivalents Section - above main grid */}
+        {/* Savings Equivalents Section - above main grid (desktop only) */}
         {showResults && baselineAmount > 0 && (
-          <div className="mb-6">
+          <div className="mb-6 hidden lg:block">
             <Card className="glass-effect allow-overflow reveal-in-slow" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
               <CardHeader className="pb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex flex-col sm:flex-row items-center gap-2 sm:justify-start justify-center text-center sm:text-left">
@@ -1552,6 +1552,116 @@ export default function AsterCalculator() {
             )}
           </div>
         </div>
+
+        {/* Savings Equivalents Section - mobile below results */}
+        {showResults && baselineAmount > 0 && (
+          <div className="mt-6 lg:hidden">
+            <Card className="glass-effect allow-overflow reveal-in-slow" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+              <CardHeader className="pb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col sm:flex-row items-center gap-2 sm:justify-start justify-center text-center sm:text-left">
+                  <div className="w-8 h-8 sm:w-8 sm:h-8 lg:w-6 lg:h-6 star-gradient rounded-lg flex items-center justify-center motion-safe:animate-pulse lg:animate-none mx-auto sm:mx-0 flex-shrink-0 float">
+                    <Rocket className="w-4 h-4 lg:w-3 lg:h-3 text-black" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base sm:text-lg text-white leading-tight">
+                      <span className="bg-gradient-to-r from-[#efbf84] via-[#f4d4a4] to-[#efbf84] bg-clip-text text-transparent lg:whitespace-nowrap">Your Savings IRL</span>
+                    </CardTitle>
+                    <p className="text-[#efbf84] text-xs whitespace-nowrap">Based on {timeframe === 'lifetime' ? '5 years' : timeframe} savings</p>
+                  </div>
+                </div>
+                <div className="sm:ml-auto flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 w-full">
+                  <div className="flex items-center justify-center gap-1 text-[10px] text-[#efbf84] bg-black/30 border border-white/10 rounded-md p-1 whitespace-nowrap">
+                    <button
+                      onClick={() => setBaselineMode('closest')}
+                      className={`flex-1 lg:flex-none px-2 py-1 rounded ${baselineMode === 'closest' ? 'bg-[#efbf84] text-black' : 'text-[#efbf84]'}`}
+                      aria-label="Show savings vs closest competitor"
+                    >Closest</button>
+                    <button
+                      onClick={() => setBaselineMode('average')}
+                      className={`flex-1 lg:flex-none px-2 py-1 rounded ${baselineMode === 'average' ? 'bg-[#efbf84] text-black' : 'text-[#efbf84]'}`}
+                      aria-label="Show savings vs average competitor"
+                    >Average</button>
+                    <button
+                      onClick={() => setBaselineMode('highest')}
+                      className={`flex-1 lg:flex-none px-2 py-1 rounded ${baselineMode === 'highest' ? 'bg-[#efbf84] text-black' : 'text-[#efbf84]'}`}
+                      aria-label="Show savings vs highest competitor"
+                    >Highest</button>
+                  </div>
+                  <div className="relative hidden sm:block">
+                    <Button 
+                      onClick={handleShareClick}
+                      className={`star-gradient hover:from-[#f4d4a4] hover:to-[#efbf84] text-black font-bold px-2 sm:px-3 py-1.5 rounded-md text-[11px] sm:text-sm h-8 sm:h-9 flex items-center gap-1.5 sm:gap-2 orange-glow flex-shrink-0 ${isSharing ? 'share-pulse' : ''}`}
+                      aria-label="Share your savings on X"
+                    >
+                      <span className="inline-flex items-center justify-center w-4 h-4 text-[18px] font-bold" style={{ lineHeight: '1' }}>𝕏</span>
+                      <span>Share</span>
+                    </Button>
+                    {isSharing && (
+                      <div className="x-burst absolute -inset-x-2 -bottom-1 top-0 z-10 pointer-events-none" aria-hidden="true">
+                        {[
+                          { x: -24, d: 0 },
+                          { x: 0, d: 80 },
+                          { x: 24, d: 0 },
+                        ].map(({ x, d }, i) => (
+                          <span key={i} style={{ left: `calc(50% + ${x}px)`, bottom: '0px', animationDelay: `${d}ms` }}>𝕏</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-stretch">
+                  {equivalents.map(({ item, count }, idx) => (
+                    <div
+                      key={item.id}
+                      className={`relative flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-4 py-3 shadow-lg hover:shadow-[#efbf84]/20 transition-all hover:-translate-y-0.5 reveal-in`}
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                        animationDelay: `${idx * 80}ms`,
+                      }}
+                    >
+                      <div className={`w-12 h-12 sm:w-10 sm:h-10 lg:w-10 lg:h-10 rounded-lg flex items-center justify-center animate-bounce ${ITEM_BG_COLOR[item.id] || 'bg-[#efbf84]'}`} style={{ animationDelay: `${idx * 120}ms` }}>
+                        <span className="text-2xl sm:text-xl lg:text-xl leading-none">{ITEM_EMOJI[item.id] || '✨'}</span>
+                      </div>
+                      <div className="text-sm text-white">
+                        <div className="font-extrabold tracking-wide">
+                          {count >= 1 ? Math.floor(count) : count.toFixed(1)}x {item.label}
+                        </div>
+                        <div className="text-xs text-[#efbf84]/80">
+                          ≈ {formatCurrency(Math.round((count) * item.unitPriceUsd))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                                {/* Mobile Share Button - Full Size */}
+                <div className="pt-4 sm:hidden relative">
+                  <Button 
+                    onClick={handleShareClick}
+                    className={`w-full star-gradient hover:from-[#f4d4a4] hover:to-[#efbf84] text-black font-bold py-2 text-sm rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 orange-glow ${isSharing ? 'share-pulse' : ''}`}
+                    aria-label="Share your savings on X"
+                  >
+                    <span className="inline-flex items-center justify-center w-4 h-4 text-[18px] font-bold mr-2" style={{ lineHeight: '1' }}>𝕏</span>
+                    Share Your Savings
+                  </Button>
+                  {isSharing && (
+                    <div className="x-burst absolute -inset-x-2 -bottom-1 top-0 z-10 pointer-events-none" aria-hidden="true">
+                      {[
+                        { x: -24, d: 0 },
+                        { x: 0, d: 80 },
+                        { x: 24, d: 0 },
+                      ].map(({ x, d }, i) => (
+                        <span key={i} style={{ left: `calc(50% + ${x}px)`, bottom: '0px', animationDelay: `${d}ms` }}>𝕏</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
       </div>
       
